@@ -159,6 +159,7 @@ function App() {
   function mintNFT() {
     const selectedItem = noneNFTItemList[activeSlide]
     const url = "http://localhost:3000/game?name=" + selectedItem[0] + "&image=" + selectedItem[1] + "&stat=" + selectedItem[2] + "&game=" + selectedItem[3] + "&publicKey=" + account
+    console.log(url)
     const link = document.createElement('a')
     link.href = url 
     link.click()
