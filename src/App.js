@@ -5,6 +5,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import axios from 'axios';
 import Web3 from 'web3';
+import aws from 'aws-sdk'
 
 class CustomSlide extends Component {
   render() {
@@ -19,12 +20,14 @@ class CustomSlide extends Component {
 }
 
 function App() {
-  const [tab, setTap] = useState("NFT")
+  const [tab, setTap] = useState("NoneNFT")
   const [noneNFTItemList, setNoneNFTItemList] = useState("a")
-  const {NFTItemList, setNFTItemList} = useState({})
+  const [NFTItemList, setNFTItemList] = useState("a")
   const [activeSlide, setActiveSlide] = useState(0)
   const [account, setAccount] = useState("")
+  const [contract, setContract] = useState("")
   const dummy = ''
+  const [alert, setAlert] = useState("a")
   window.web3 = new Web3(window.ethereum);
   window.ethereum.enable();
 
@@ -41,36 +44,58 @@ function App() {
   var renderSlide = ''
 
   useEffect(() => {
+    console.log(123123123123123)
     if (noneNFTItemList !== "a") return;
+    console.log("rendering")
     axios.post("http://localhost:3030/game1").then((res)=>{setNoneNFTItemList(res.data)
-    getAccount()
-    console.log(account)
+    getContractInstance()
+    .then(response => {
+      const contract = response
+      window.ethereum.request({ method: 'eth_requestAccounts' })
+      .then(response => {
+        setAccount(response[0])
+        getNFTList(response[0], contract)
+        .then(setAlert("b"))
+      })
+    })
   });
   }, [])
-  async function getAccount() {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
-    setAccount(accounts[0])
-  }
+
   var imageurl =''
   var nameOfWeapon=''
   var nonNFTList = []
-  if (tab === 'NFT') {
-    imageurl = "/weapon/Weapon_Spectre.png"
-    nameOfWeapon = "Weapon_Spectre"
-  }
-  else {
-    for (var i in noneNFTItemList) {
-      console.log(noneNFTItemList[i][1])
-      nonNFTList.push({name: noneNFTItemList[i][0], imageurl: noneNFTItemList[i][1]})
-
+  console.log(890890890890)
+  if (tab === 'NoneNFT') {
+    if (NFTItemList !== []) {
+      for (var i in NFTItemList) {
+        console.log(NFTItemList[i].name)
+        for (var j in noneNFTItemList) {
+          if (noneNFTItemList[j][0] === NFTItemList[i].name) {
+            console.log(noneNFTItemList[j][0])
+            noneNFTItemList.splice(j, 1)
+          }
+        }
+      }
+      for (var i in noneNFTItemList) {
+        nonNFTList.push({name: noneNFTItemList[i][0], imageurl: noneNFTItemList[i][1]})
+      }
+      renderSlide = nonNFTList.map(item => {
+        return (
+          <CustomSlide key={item.name} item={[item.name, item.imageurl, activeSlide]}></CustomSlide>
+        )
+      })
     }
-    console.log(nonNFTList)
-    renderSlide = nonNFTList.map(item => {
+    
+  }
+  else if (alert === "b") {
+    
+    renderSlide = NFTItemList.map(item => {
       return (
-        <CustomSlide key={item.name} item={[item.name, item.imageurl, activeSlide]}></CustomSlide>
+        <CustomSlide key={item.name} item={[item.name, item.url, item.stat,  activeSlide]}></CustomSlide>
       )
     })
   }
+  
   function showNFT() {
     setTap('NFT')
     console.log("showNFT")
@@ -81,10 +106,58 @@ function App() {
     console.log("showNoneNFT")
   }
 
+  async function getAccount() {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    setAccount(accounts[0])
+  }
+
+  async function getContractInstance() {
+    let contract;
+    // Contract 불러오기 및 NFT 정보 확인
+    await fetch('../abi/nft_abi.json')
+    .then(response => response.json())
+    .then(data => {
+        //connect to NFTToken contract(Ropsten test network)
+        let contract_abi = data;
+        let contract_address = "0x0366f1f1143397Ee686EFCD083a4Ec20688E6073";
+        contract = new window.web3.eth.Contract(contract_abi, contract_address)
+        
+    });
+    return contract;
+}
+
+  async function getNFTList (account, contract) {
+    console.log(account, "account in getNFTList")
+    const url = "http://localhost:3030/getItemInfo?public_key=" + account + "&game=" + "game1"
+    const response = await axios.get(url)
+    const contractA = await contract
+    var nftURIList = []
+    for (var i in response.data) {
+      if (response.data[i].game === "game1") {
+        var nftImgJSONUrl = await contractA.methods.getUri(response.data[i].img_token_id).call()
+        var nftStatJSONUrl = await contractA.methods.getUri(response.data[i].stat_token_id).call()
+        console.log(nftImgJSONUrl, "nftImgJSONUrl")
+        console.log(nftStatJSONUrl, "nftStatJSONUrl")
+
+        const nftimgJSON = await fetch(nftImgJSONUrl).then(response => response.json())
+
+        const nftStatJSON = await fetch(nftStatJSONUrl).then(response => response.json())
+        console.log(nftimgJSON, "nftimgJSON")
+        console.log(nftStatJSON, "nftStatJSON")
+        const nftstat = await fetch(nftStatJSON.url).then(response => response.json())
+        
+        nftURIList.push({name: response.data[i].name, url: nftimgJSON.url, stat: nftstat}) 
+        console.log(nftURIList)
+      }
+      else {
+        break
+      }
+    }
+    setNFTItemList(nftURIList)
+  }
+
   function mintNFT() {
-    console.log(noneNFTItemList[0])
     const selectedItem = noneNFTItemList[activeSlide]
-    console.log(selectedItem, "selectedItem")
     const url = "http://localhost:3000/game?name=" + selectedItem[0] + "&image=" + selectedItem[1] + "&stat=" + selectedItem[2] + "&game=" + selectedItem[3] + "&publicKey=" + account
     const link = document.createElement('a')
     link.href = url 
