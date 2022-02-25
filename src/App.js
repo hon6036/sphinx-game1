@@ -6,7 +6,7 @@ import "./slick-theme.css";
 import axios from 'axios';
 import Web3 from 'web3';
 import aws from 'aws-sdk'
-import statImg from "./img/Stat.png"
+
 class CustomSlide extends Component {
   constructor(props) {
     super(props)
@@ -16,18 +16,12 @@ class CustomSlide extends Component {
   }
   render() {
     const {item, ...props} = this.props
-    console.log(item)
     return (
       <div>
         <div className='Inner-slide-text'>{item[0]}</div>
         {this.state.count === 0 ? <img className='Inner-slide-image' src={item[1]} onClick={() => this.setState({count: 1})}>
         </img>
-        :<div className='Inner-slide-div' onClick={() => this.setState({count: 0})}>
-          <img className='Stat-image' src={statImg}></img>
-          <p className='Inner-slide-Stat'>
-            <span>{item[2]}</span>
-          </p>
-        </div>
+        :<div onClick={() => this.setState({count: 0})}>{item[2]}</div>
     }
       </div>
     )}
@@ -60,9 +54,7 @@ function App() {
 
   useEffect(() => {
     if (noneNFTItemList !== "a") return;
-    console.log("rendering")
-    axios.post("http://3.34.2.167:3000/game1").then((res)=>{setNoneNFTItemList(res.data)
-    console.log(res.data)
+    axios.post("http://localhost:3030/game1").then((res)=>{setNoneNFTItemList(res.data)
     getContractInstance()
     .then(response => {
       const contract = response
@@ -75,14 +67,12 @@ function App() {
     })
   });
   }, [])
-
   var imageurl =''
   var nameOfWeapon=''
   var nonNFTList = []
   if (tab === 'NoneNFT') {
     if (NFTItemList !== []) {
       for (var i in NFTItemList) {
-        console.log(NFTItemList[i].name)
         for (var j in noneNFTItemList) {
           if (noneNFTItemList[j][0] === NFTItemList[i].name) {
             noneNFTItemList.splice(j, 1)
@@ -90,17 +80,18 @@ function App() {
         }
       }
       for (var i in noneNFTItemList) {
-        nonNFTList.push({name: noneNFTItemList[i][0], imageurl: noneNFTItemList[i][1], stat: noneNFTItemList[i][2]})
+        nonNFTList.push({name: noneNFTItemList[i][0], imageurl: noneNFTItemList[i][1]})
       }
       renderSlide = nonNFTList.map(item => {
         return (
-          <CustomSlide key={item.name} item={[item.name, item.imageurl, item.stat, activeSlide]}></CustomSlide>
+          <CustomSlide key={item.name} item={[item.name, item.imageurl, activeSlide]}></CustomSlide>
         )
       })
     }
     
   }
   else if (alert === "b") {
+    
     renderSlide = NFTItemList.map(item => {
       return (
         <CustomSlide key={item.name} item={[item.name, item.url, item.stat,  activeSlide]}></CustomSlide>
@@ -110,12 +101,10 @@ function App() {
   
   function showNFT() {
     setTap('NFT')
-    console.log("showNFT")
   }
 
   function showNoneNFT() {
     setTap('NoneNFT')
-    console.log("showNoneNFT")
   }
 
   async function getAccount() {
@@ -139,6 +128,7 @@ function App() {
 }
 
   async function getNFTList (account, contract) {
+    
     const url = "http://localhost:3030/getItemInfo?public_key=" + account + "&game=" + "game1"
     const response = await axios.get(url)
     const contractA = await contract
@@ -146,20 +136,14 @@ function App() {
     for (var i in response.data) {
       if (response.data[i].game === "game1") {
         var nftImgJSONUrl = await contractA.methods.getUri(response.data[i].img_token_id).call()
-        console.log(nftImgJSONUrl, "nftImgJSONUrl")
+        console.log(nftImgJSONUrl, "34234")
         var nftStatJSONUrl = await contractA.methods.getUri(response.data[i].stat_token_id).call()
-        console.log(nftImgJSONUrl, "nftImgJSONUrl")
-        console.log(nftStatJSONUrl, "nftStatJSONUrl")
-
         const nftimgJSON = await fetch(nftImgJSONUrl).then(response => response.json())
 
         const nftStatJSON = await fetch(nftStatJSONUrl).then(response => response.json())
-        console.log(nftimgJSON, "nftimgJSON")
-        console.log(nftStatJSON, "nftStatJSON")
         const nftstat = await fetch(nftStatJSON.url).then(response => response.json())
         
         nftURIList.push({name: response.data[i].name, url: nftimgJSON.url, stat: nftstat}) 
-        console.log(nftURIList)
       }
       else {
         break
@@ -171,8 +155,7 @@ function App() {
 
   function mintNFT() {
     const selectedItem = noneNFTItemList[activeSlide]
-    const url = "http://localhost:3000/Game?name=" + selectedItem[0] + "&image=" + selectedItem[1] + "&stat=" + selectedItem[2] + "&game=" + selectedItem[3] + "&publicKey=" + account
-    console.log(url)
+    const url = "http://localhost:3000/game?name=" + selectedItem[0] + "&image=" + selectedItem[1] + "&stat=" + selectedItem[2] + "&game=" + selectedItem[3] + "&publicKey=" + account
     const link = document.createElement('a')
     link.href = url 
     link.click()
