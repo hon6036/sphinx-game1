@@ -7,7 +7,3 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 In the project directory, you can run:
 
 ### `npm start`
-
-open localhost:3004
-
-connect to metamask and change the network to Ropsten
