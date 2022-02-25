@@ -54,7 +54,7 @@ function App() {
 
   useEffect(() => {
     if (noneNFTItemList !== "a") return;
-    axios.post("http://localhost:3030/game1").then((res)=>{setNoneNFTItemList(res.data)
+    axios.post("http://3.34.2.167:3000/game1").then((res)=>{setNoneNFTItemList(res.data)
     getContractInstance()
     .then(response => {
       const contract = response
@@ -129,7 +129,7 @@ function App() {
 
   async function getNFTList (account, contract) {
     
-    const url = "http://localhost:3030/getItemInfo?public_key=" + account + "&game=" + "game1"
+    const url = "http://3.34.2.167:3000/getItemInfo?public_key=" + account + "&game=" + "game1"
     const response = await axios.get(url)
     const contractA = await contract
     var nftURIList = []
