@@ -54,7 +54,7 @@ function App() {
 
   useEffect(() => {
     if (noneNFTItemList !== "a") return;
-    axios.post("http://3.34.2.167:3000/game1").then((res)=>{setNoneNFTItemList(res.data)
+    axios.post("http://3.35.22.52:3000/game1").then((res)=>{setNoneNFTItemList(res.data)
     getContractInstance()
     .then(response => {
       const contract = response
