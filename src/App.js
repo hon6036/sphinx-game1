@@ -7,7 +7,6 @@ import axios from 'axios';
 import Web3 from 'web3';
 import aws from 'aws-sdk'
 import statImg from "./img/Stat.png"
-
 class CustomSlide extends Component {
   constructor(props) {
     super(props)
@@ -60,10 +59,9 @@ function App() {
   var renderSlide = ''
 
   useEffect(() => {
-    console.log(123123123123123)
     if (noneNFTItemList !== "a") return;
     console.log("rendering")
-    axios.post("http://localhost:3030/game1").then((res)=>{setNoneNFTItemList(res.data)
+    axios.post("http://3.34.2.167:3000/game1").then((res)=>{setNoneNFTItemList(res.data)
     console.log(res.data)
     getContractInstance()
     .then(response => {
@@ -81,7 +79,6 @@ function App() {
   var imageurl =''
   var nameOfWeapon=''
   var nonNFTList = []
-  console.log(890890890890)
   if (tab === 'NoneNFT') {
     if (NFTItemList !== []) {
       for (var i in NFTItemList) {
@@ -134,7 +131,7 @@ function App() {
     .then(data => {
         //connect to NFTToken contract(Ropsten test network)
         let contract_abi = data;
-        let contract_address = "0x0366f1f1143397Ee686EFCD083a4Ec20688E6073";
+        let contract_address = "0x48F5dED0aD02C646D58c7ca54d32b697CDeB93ec";
         contract = new window.web3.eth.Contract(contract_abi, contract_address)
         
     });
@@ -142,7 +139,6 @@ function App() {
 }
 
   async function getNFTList (account, contract) {
-    console.log(account, "account in getNFTList")
     const url = "http://localhost:3030/getItemInfo?public_key=" + account + "&game=" + "game1"
     const response = await axios.get(url)
     const contractA = await contract
@@ -150,6 +146,7 @@ function App() {
     for (var i in response.data) {
       if (response.data[i].game === "game1") {
         var nftImgJSONUrl = await contractA.methods.getUri(response.data[i].img_token_id).call()
+        console.log(nftImgJSONUrl, "nftImgJSONUrl")
         var nftStatJSONUrl = await contractA.methods.getUri(response.data[i].stat_token_id).call()
         console.log(nftImgJSONUrl, "nftImgJSONUrl")
         console.log(nftStatJSONUrl, "nftStatJSONUrl")
