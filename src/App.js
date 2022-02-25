@@ -1,25 +1,41 @@
 import './App.css';
 import { useState, Component, useEffect } from "react";
 import Slider from "react-slick"
-import "slick-carousel/slick/slick.css"; 
-import "slick-carousel/slick/slick-theme.css";
+import "./slick.css"; 
+import "./slick-theme.css";
 import axios from 'axios';
 import Web3 from 'web3';
 import aws from 'aws-sdk'
+import statImg from "./img/Stat.png"
 
 class CustomSlide extends Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      count: 0
+    }
+  }
   render() {
     const {item, ...props} = this.props
+    console.log(item)
     return (
       <div>
         <div className='Inner-slide-text'>{item[0]}</div>
-        <img className='Inner-slide-image' src={item[1]}>
+        {this.state.count === 0 ? <img className='Inner-slide-image' src={item[1]} onClick={() => this.setState({count: 1})}>
         </img>
+        :<div className='Inner-slide-div' onClick={() => this.setState({count: 0})}>
+          <img className='Stat-image' src={statImg}></img>
+          <p className='Inner-slide-Stat'>
+            <span>{item[2]}</span>
+          </p>
+        </div>
+    }
       </div>
     )}
 }
 
 function App() {
+  const [loadingPage, setLoadingPage] = useState(0)
   const [tab, setTap] = useState("NoneNFT")
   const [noneNFTItemList, setNoneNFTItemList] = useState("a")
   const [NFTItemList, setNFTItemList] = useState("a")
@@ -48,6 +64,7 @@ function App() {
     if (noneNFTItemList !== "a") return;
     console.log("rendering")
     axios.post("http://localhost:3030/game1").then((res)=>{setNoneNFTItemList(res.data)
+    console.log(res.data)
     getContractInstance()
     .then(response => {
       const contract = response
@@ -71,24 +88,22 @@ function App() {
         console.log(NFTItemList[i].name)
         for (var j in noneNFTItemList) {
           if (noneNFTItemList[j][0] === NFTItemList[i].name) {
-            console.log(noneNFTItemList[j][0])
             noneNFTItemList.splice(j, 1)
           }
         }
       }
       for (var i in noneNFTItemList) {
-        nonNFTList.push({name: noneNFTItemList[i][0], imageurl: noneNFTItemList[i][1]})
+        nonNFTList.push({name: noneNFTItemList[i][0], imageurl: noneNFTItemList[i][1], stat: noneNFTItemList[i][2]})
       }
       renderSlide = nonNFTList.map(item => {
         return (
-          <CustomSlide key={item.name} item={[item.name, item.imageurl, activeSlide]}></CustomSlide>
+          <CustomSlide key={item.name} item={[item.name, item.imageurl, item.stat, activeSlide]}></CustomSlide>
         )
       })
     }
     
   }
   else if (alert === "b") {
-    
     renderSlide = NFTItemList.map(item => {
       return (
         <CustomSlide key={item.name} item={[item.name, item.url, item.stat,  activeSlide]}></CustomSlide>
@@ -154,11 +169,12 @@ function App() {
       }
     }
     setNFTItemList(nftURIList)
+    setLoadingPage(1)
   }
 
   function mintNFT() {
     const selectedItem = noneNFTItemList[activeSlide]
-    const url = "http://localhost:3000/game?name=" + selectedItem[0] + "&image=" + selectedItem[1] + "&stat=" + selectedItem[2] + "&game=" + selectedItem[3] + "&publicKey=" + account
+    const url = "http://localhost:3000/Game?name=" + selectedItem[0] + "&image=" + selectedItem[1] + "&stat=" + selectedItem[2] + "&game=" + selectedItem[3] + "&publicKey=" + account
     console.log(url)
     const link = document.createElement('a')
     link.href = url 
@@ -166,6 +182,8 @@ function App() {
   }
 
   return (
+    <div>
+    {loadingPage === 0 ? <div className='Loading-page'></div> :
     <div className="App">
       <div className='Inventory'>
         <button className={`Inventory-button ${tab === 'NFT' ? 'active' : ''}`} onClick={showNFT}>NFT Item</button>
@@ -186,7 +204,8 @@ function App() {
             }
         </div>
       </div>
-    </div>
+</div>}
+</div>
   );
 }
 

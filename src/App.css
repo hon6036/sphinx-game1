@@ -8,6 +8,9 @@
   overflow:hidden;
 }
 
+.Loading-page {
+  background-color: black;
+}
 .Inventory {
   background: url(./img/Inventory.png) no-repeat;
   background-size: 43.5%;
@@ -45,7 +48,7 @@
 
 .Weapon-background {
   top: 15%;
-  left: 10%;
+  left: 12%;
   position: absolute;
   background: url(./img/WeaponBackground.png) no-repeat;
   width: 25%;
@@ -62,7 +65,7 @@
 .Inner-slide-text {
   position: relative;
   margin-top: 30px;
-  margin-left: 40px;
+  margin-left: 50px;
   margin-bottom: 80px;
   font-family: El Messiri;
   font-style: normal;
@@ -76,13 +79,41 @@
 .Inner-slide-image {
   display: block;
   margin: auto;
+  height: 300px;
+  width: 300px;
+}
+
+.Inner-slide-div {
+  margin-left: 50px;
   height: 200px;
+}
+
+.Inner-slide-Stat {
+  width: 208px;
+  height: 33px;
+  left: 38px;
+  top: 4px;
+  font-family: El Messiri;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 40px;
+  line-height: 63px;
+  display: flex;
+  align-items: center;
+  margin-left: 50px;
+}
+
+.Inner-slide-Stat span {
+  background: linear-gradient(180deg, #C09645 7.5%, #FFC977 53.75%, #C09645 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .slick-track {
 }
 
 .slick-list {
+  width: 300px;
   height: 400px;
 }
 
